@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Net.Http;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SonnyTray.Models;
@@ -248,11 +250,19 @@ public partial class ExitNodePickerViewModel : ObservableObject
     private async Task SelectExitNodeAsync(string? nodeId)
     {
         nodeId ??= "";
-        await _client.SetPrefsAsync(new MaskedPrefs
+        try
         {
-            ExitNodeID = nodeId,
-            ExitNodeIDSet = true,
-        });
+            await _client.SetPrefsAsync(new MaskedPrefs
+            {
+                ExitNodeID = nodeId,
+                ExitNodeIDSet = true,
+            });
+        }
+        catch (HttpRequestException ex)
+        {
+            Debug.WriteLine($"Failed to set exit node: {ex.Message}");
+            return;
+        }
         SelectedExitNodeId = nodeId;
         _main.ShowExitNodePicker = false;
     }

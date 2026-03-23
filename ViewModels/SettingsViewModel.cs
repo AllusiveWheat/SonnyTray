@@ -30,9 +30,6 @@ public partial class SettingsViewModel : ObservableObject
     // Peer visibility
     [ObservableProperty] private bool _hideMyDevices;
     [ObservableProperty] private bool _hideOtherDevices;
-    [ObservableProperty] private bool _hideTaggedDevices;
-    [ObservableProperty] private bool _hideFunnelDevices;
-    [ObservableProperty] private bool _hideAppConnectors;
 
     // TailDrive
     [ObservableProperty] private bool _showAddShare;
@@ -144,27 +141,6 @@ public partial class SettingsViewModel : ObservableObject
         HideDevicesChanged?.Invoke();
     }
 
-    partial void OnHideTaggedDevicesChanged(bool value)
-    {
-        if (_loading) return;
-        SaveHideDeviceSetting(nameof(HideTaggedDevices), value);
-        HideDevicesChanged?.Invoke();
-    }
-
-    partial void OnHideFunnelDevicesChanged(bool value)
-    {
-        if (_loading) return;
-        SaveHideDeviceSetting(nameof(HideFunnelDevices), value);
-        HideDevicesChanged?.Invoke();
-    }
-
-    partial void OnHideAppConnectorsChanged(bool value)
-    {
-        if (_loading) return;
-        SaveHideDeviceSetting(nameof(HideAppConnectors), value);
-        HideDevicesChanged?.Invoke();
-    }
-
     public event Action? HideDevicesChanged;
 
     partial void OnAdvertiseExitNodeChanged(bool value)
@@ -203,9 +179,6 @@ public partial class SettingsViewModel : ObservableObject
             if (key is null) return;
             HideMyDevices = (key.GetValue(nameof(HideMyDevices)) as int?) == 1;
             HideOtherDevices = (key.GetValue(nameof(HideOtherDevices)) as int?) == 1;
-            HideTaggedDevices = (key.GetValue(nameof(HideTaggedDevices)) as int?) == 1;
-            HideFunnelDevices = (key.GetValue(nameof(HideFunnelDevices)) as int?) == 1;
-            HideAppConnectors = (key.GetValue(nameof(HideAppConnectors)) as int?) == 1;
         }
         catch { }
     }

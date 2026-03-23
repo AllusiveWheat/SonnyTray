@@ -76,7 +76,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
 
     [ObservableProperty] private string _loginUserName = "";
 
-    public ObservableCollection<PeerItem> Peers { get; } = [];
+    public ObservableCollection<PeerGroup> PeerGroups { get; } = [];
     public PeerDetailViewModel PeerDetail { get; private set; } = null!;
 
     public MainViewModel(TailscaleClient client)
@@ -168,9 +168,10 @@ public partial class MainViewModel : ObservableObject, IDisposable
         // Build peer list; hide exit node infrastructure (peers with Location data or mullvad DNS)
         // and apply device visibility settings (matching tailscale-android MDM hiding)
         var selfUserId = status.Self?.UserID ?? 0;
-        Peers.Clear();
+        PeerGroups.Clear();
         if (status.Peer is not null)
         {
+            var filteredPeers = new List<PeerItem>();
             foreach (var (_, peer) in status.Peer)
             {
                 if (peer.Location is not null)
@@ -182,14 +183,11 @@ public partial class MainViewModel : ObservableObject, IDisposable
                     continue;
                 if (Settings.HideOtherDevices && peer.UserID != selfUserId)
                     continue;
-                if (Settings.HideTaggedDevices && peer.Tags is { Count: > 0 })
-                    continue;
-                if (Settings.HideFunnelDevices && peer.CapMap?.ContainsKey("funnel") == true)
-                    continue;
-                if (Settings.HideAppConnectors && peer.CapMap?.ContainsKey("tailscale.com/app-connectors") == true)
-                    continue;
+                var userName = "";
+                if (status.User is not null && status.User.TryGetValue(peer.UserID.ToString(), out var user))
+                    userName = !string.IsNullOrEmpty(user.DisplayName) ? user.DisplayName : user.LoginName;
 
-                Peers.Add(new PeerItem
+                filteredPeers.Add(new PeerItem
                 {
                     Id = peer.Id,
                     HostName = peer.HostName,
@@ -210,8 +208,25 @@ public partial class MainViewModel : ObservableObject, IDisposable
                     LastSeen = peer.LastSeen,
                     Created = peer.Created,
                     UserID = peer.UserID,
+                    UserName = userName,
                 });
             }
+
+            // Group by user: "My devices" first, then other users alphabetically
+            // Within each group: online first, then alphabetically by display name
+            var groups = filteredPeers
+                .GroupBy(p => p.UserID)
+                .OrderByDescending(g => g.Key == selfUserId)
+                .ThenBy(g => g.First().UserName)
+                .Select(g =>
+                {
+                    var heading = g.Key == selfUserId ? "My Devices" : g.First().UserName;
+                    var sorted = g.OrderByDescending(p => p.IsOnline).ThenBy(p => p.DisplayName).ToList();
+                    return new PeerGroup(heading, sorted);
+                });
+
+            foreach (var group in groups)
+                PeerGroups.Add(group);
         }
 
         // Current exit node
@@ -252,7 +267,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
         // Update peer detail if open
         if (ShowPeerDetail && PeerDetail.Peer is { } currentPeer && status.Peer is not null)
         {
-            var freshPeer = Peers.FirstOrDefault(p => p.Id == currentPeer.Id);
+            var freshPeer = PeerGroups.SelectMany(g => g.Peers).FirstOrDefault(p => p.Id == currentPeer.Id);
             if (freshPeer is not null)
                 PeerDetail.UpdatePeer(freshPeer);
         }
@@ -566,6 +581,7 @@ public class PeerItem
     public DateTime? LastSeen { get; set; }
     public DateTime? Created { get; set; }
     public long UserID { get; set; }
+    public string UserName { get; set; } = "";
 
     public bool IsDirect => !string.IsNullOrEmpty(CurAddr);
     public bool HasRelay => !string.IsNullOrEmpty(Relay);
@@ -617,4 +633,10 @@ public class PeerItem
         < 1024 * 1024 * 1024 => $"{bytes / (1024.0 * 1024):F1} MB",
         _ => $"{bytes / (1024.0 * 1024 * 1024):F2} GB"
     };
+}
+
+public class PeerGroup(string heading, List<PeerItem> peers)
+{
+    public string Heading { get; } = heading;
+    public List<PeerItem> Peers { get; } = peers;
 }

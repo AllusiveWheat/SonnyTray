@@ -813,39 +813,6 @@
                                        VerticalAlignment="Center"/>
                         </DockPanel>
 
-                        <DockPanel Margin="8,4">
-                            <local:FluentToggleButton DockPanel.Dock="Right"
-                                          Style="{DynamicResource FluentToggle}"
-                                          IsChecked="{Binding Settings.HideTaggedDevices}"
-                                          VerticalAlignment="Center"/>
-                            <TextBlock Text="Hide tagged devices"
-                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                       FontFamily="{DynamicResource BodyFont}" FontSize="12"
-                                       VerticalAlignment="Center"/>
-                        </DockPanel>
-
-                        <DockPanel Margin="8,4">
-                            <local:FluentToggleButton DockPanel.Dock="Right"
-                                          Style="{DynamicResource FluentToggle}"
-                                          IsChecked="{Binding Settings.HideFunnelDevices}"
-                                          VerticalAlignment="Center"/>
-                            <TextBlock Text="Hide funnel devices"
-                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                       FontFamily="{DynamicResource BodyFont}" FontSize="12"
-                                       VerticalAlignment="Center"/>
-                        </DockPanel>
-
-                        <DockPanel Margin="8,4">
-                            <local:FluentToggleButton DockPanel.Dock="Right"
-                                          Style="{DynamicResource FluentToggle}"
-                                          IsChecked="{Binding Settings.HideAppConnectors}"
-                                          VerticalAlignment="Center"/>
-                            <TextBlock Text="Hide app connectors"
-                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                       FontFamily="{DynamicResource BodyFont}" FontSize="12"
-                                       VerticalAlignment="Center"/>
-                        </DockPanel>
-
                         <!-- TailDrive section -->
                         <Border Height="1" Background="{DynamicResource DividerBrush}" Margin="4,6"/>
                         <StackPanel>
@@ -1210,48 +1177,61 @@
                                    FontSize="11" FontWeight="SemiBold"
                                    VerticalAlignment="Center"/>
                     </StackPanel>
-                    <ItemsControl ItemsSource="{Binding Peers}" Padding="4,0,4,4">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border Padding="10,7" CornerRadius="4" Cursor="Hand"
-                                            MouseLeftButtonUp="OnPeerClick">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Background" Value="Transparent"/>
-                                                <Style.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="{DynamicResource SubtleBrush}"/>
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <DockPanel>
-                                            <Ellipse DockPanel.Dock="Left"
-                                                     Width="8" Height="8"
-                                                     Fill="{Binding IsOnline, Converter={StaticResource OnlineBrush}}"
-                                                     VerticalAlignment="Center"
-                                                     Margin="0,0,10,0"/>
-                                            <TextBlock DockPanel.Dock="Right"
-                                                       Text="{Binding IP}"
-                                                       Foreground="{DynamicResource TextTertiaryBrush}"
-                                                       FontFamily="{DynamicResource BodyFont}"
-                                                       FontSize="11"
-                                                       VerticalAlignment="Center"/>
-                                            <StackPanel VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding DisplayName}"
-                                                           Foreground="{DynamicResource TextPrimaryBrush}"
-                                                           FontFamily="{DynamicResource BodyFont}"
-                                                           FontSize="13"/>
-                                                <TextBlock Text="{Binding OS}"
-                                                           Foreground="{DynamicResource TextTertiaryBrush}"
-                                                           FontFamily="{DynamicResource BodyFont}"
-                                                           FontSize="11"/>
-                                            </StackPanel>
-                                        </DockPanel>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                    <ItemsControl ItemsSource="{Binding PeerGroups}" Padding="4,0,4,4">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Heading}"
+                                               Foreground="{DynamicResource TextTertiaryBrush}"
+                                               FontFamily="{DynamicResource BodyFont}"
+                                               FontSize="11" FontWeight="SemiBold"
+                                               Margin="10,10,10,2"/>
+                                    <ItemsControl ItemsSource="{Binding Peers}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Padding="10,7" CornerRadius="4" Cursor="Hand"
+                                                        MouseLeftButtonUp="OnPeerClick">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="Background" Value="Transparent"/>
+                                                            <Style.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <Setter Property="Background" Value="{DynamicResource SubtleBrush}"/>
+                                                                </Trigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                    <DockPanel>
+                                                        <Ellipse DockPanel.Dock="Left"
+                                                                 Width="8" Height="8"
+                                                                 Fill="{Binding IsOnline, Converter={StaticResource OnlineBrush}}"
+                                                                 VerticalAlignment="Center"
+                                                                 Margin="0,0,10,0"/>
+                                                        <TextBlock DockPanel.Dock="Right"
+                                                                   Text="{Binding IP}"
+                                                                   Foreground="{DynamicResource TextTertiaryBrush}"
+                                                                   FontFamily="{DynamicResource BodyFont}"
+                                                                   FontSize="11"
+                                                                   VerticalAlignment="Center"/>
+                                                        <StackPanel VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding DisplayName}"
+                                                                       Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                       FontFamily="{DynamicResource BodyFont}"
+                                                                       FontSize="13"/>
+                                                            <TextBlock Text="{Binding OS}"
+                                                                       Foreground="{DynamicResource TextTertiaryBrush}"
+                                                                       FontFamily="{DynamicResource BodyFont}"
+                                                                       FontSize="11"/>
+                                                        </StackPanel>
+                                                    </DockPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                 </StackPanel>
 
                 </StackPanel>
